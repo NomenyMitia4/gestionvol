@@ -1,13 +1,12 @@
 from app import app
 from model.user_model import user_model
 from flask import request
-
-user = user_model()
+import json
 
 @app.route("/user/signup")
 def signup():
-    obj = user_model()
-    return obj.user_create()
+    user = user_model()
+    return user.user_create()
 
 @app.route("/user/login")
 def login():
@@ -19,11 +18,19 @@ def logout():
 
 @app.route("/user/getAll")
 def user_getAll():
-    user = user.user_read()
-    
-    return user
+    user = user_model()
+    return user.user_read()
 
 @app.route("/user/add", methods=["POST"])
 def user_add():
-    return user.user_create(request.form)
+    user = user_model()
+    try:
+        data = request.get_json()
+        if not data:
+            return json({"error": "No JSON data received"}), 400
+        
+        result = user.user_create(data)
+        return json.dumps(result)
+    except Exception as e:
+        return json.dumps({"error": str(e)}), 500
 
